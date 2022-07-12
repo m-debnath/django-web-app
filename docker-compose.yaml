@@ -1,0 +1,70 @@
+version: '3.8'
+services:
+  django-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - "django-app-db"
+    volumes:
+      - .:/app
+      - static_data:/vol/web
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_DJANGO_SUPER_USER=${POSTGRES_DJANGO_SUPER_USER}
+      - CACHE_REDIS_HOST=${CACHE_REDIS_HOST}
+      - CACHE_REDIS_PORT=${CACHE_REDIS_PORT}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
+      - CURRENT_HOST=${CURRENT_HOST}
+      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE}
+      - CSRF_COOKIE_SECURE=${CSRF_COOKIE_SECURE}
+      - DEBUG=${DEBUG}
+      - DJANGO_ENV=${DJANGO_ENV}
+  django-app-proxy:
+    build:
+      context: ./proxy
+    restart: unless-stopped
+    volumes:
+      - static_data:/vol/static
+    ports:
+      - "8000:8000"
+    depends_on:
+      - django-app
+  django-app-cache:
+    image: 'redis:7.0.3'
+    restart: unless-stopped
+  django-app-redis-admin:
+    image: erikdubbelboer/phpredisadmin
+    restart: unless-stopped
+    environment:
+      - REDIS_1_HOST=${CACHE_REDIS_HOST}
+    ports:
+      - "9083:80"
+  django-app-db:
+    image: postgres:14.4
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - django-app-db-data:/var/lib/postgresql/data
+  django-app-pgadmin:
+    image: dpage/pgadmin4:6.11
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+volumes:
+  django-app-db-data:
+  static_data:
+  pgadmin_data:
