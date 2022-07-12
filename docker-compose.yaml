@@ -20,6 +20,7 @@ services:
       - POSTGRES_DJANGO_SUPER_USER=${POSTGRES_DJANGO_SUPER_USER}
       - CACHE_REDIS_HOST=${CACHE_REDIS_HOST}
       - CACHE_REDIS_PORT=${CACHE_REDIS_PORT}
+      - CACHE_REDIS_PASSWORD=${CACHE_REDIS_PASSWORD}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
       - CURRENT_HOST=${CURRENT_HOST}
@@ -40,11 +41,13 @@ services:
   django-app-cache:
     image: 'redis:7.0.3'
     restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${CACHE_REDIS_PASSWORD}
   django-app-redis-admin:
-    image: erikdubbelboer/phpredisadmin
+    image: erikdubbelboer/phpredisadmin:v1.17.2
     restart: unless-stopped
     environment:
       - REDIS_1_HOST=${CACHE_REDIS_HOST}
+      - REDIS_1_AUTH=${CACHE_REDIS_PASSWORD}
     ports:
       - "9083:80"
   django-app-db:

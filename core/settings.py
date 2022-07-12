@@ -109,6 +109,11 @@ MEDIA_ROOT = "/vol/web/media"
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://django-app-cache:6379",
+        "LOCATION": "redis://:"
+        + os.environ.get("CACHE_REDIS_PASSWORD", "")
+        + "@"
+        + os.environ.get("CACHE_REDIS_HOST", "")
+        + ":"
+        + os.environ.get("CACHE_REDIS_PORT", ""),
     }
 }
