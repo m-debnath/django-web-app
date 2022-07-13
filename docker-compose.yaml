@@ -9,7 +9,7 @@ services:
       - "django-app-db"
     volumes:
       - .:/app
-      - static_data:/vol/web
+      - django-app-static-data:/vol/web
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -33,7 +33,7 @@ services:
       context: ./proxy
     restart: unless-stopped
     volumes:
-      - static_data:/vol/static
+      - django-app-static-data:/vol/static
     ports:
       - "8000:8000"
     depends_on:
@@ -64,10 +64,10 @@ services:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - django-app-pgadmin-data:/var/lib/pgadmin
     ports:
       - "5050:80"
 volumes:
   django-app-db-data:
-  static_data:
-  pgadmin_data:
+  django-app-static-data:
+  django-app-pgadmin-data:
